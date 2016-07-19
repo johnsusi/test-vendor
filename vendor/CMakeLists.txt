@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 3.5)
 
 set(CMAKE_MACOSX_RPATH ON)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
 
 include(ExternalProject)
 
@@ -146,8 +147,9 @@ ExternalProject_add(
   BUILD_COMMAND  ""
   UPDATE_COMMAND ""
   CONFIGURE_COMMAND
+#  darwin64-x86_64-cc
     cd <SOURCE_DIR> && ./Configure
-      darwin64-x86_64-cc
+      linux-x86_64
       --prefix=${VENDOR_DIR}
       --with-zlib-include=${VENDOR_DIR}/include
       --with-zlib-lib=${VENDOR_DIR}/lib
