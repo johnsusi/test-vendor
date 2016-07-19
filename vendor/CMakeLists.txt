@@ -117,7 +117,7 @@ ExternalProject_add(
 ExternalProject_add(
   png
   DEPENDS zlib
-  URL http://download.sourceforge.net/libpng/libpng-1.6.23.tar.gz
+  URL ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.23.tar.gz
   URL_HASH MD5=a49e4cc48d968c79def53d082809c9f2
   BUILD_COMMAND ""
   CMAKE_ARGS
