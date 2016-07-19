@@ -1,44 +1,38 @@
 language: cpp
-
 matrix:
   include:
-    # - os: linux
-    #   compiler: clang
-    #   addons: &clang38
-    #     apt:
-    #       sources: ['llvm-toolchain-precise-3.8', 'ubuntu-toolchain-r-test']
-    #       packages: ['clang-3.8']
-    #   env: COMPILER='clang++-3.8' BUILD_TYPE='Release'
-
-    - os: linux
-      compiler: gcc
-      addons: &gcc5
-        apt:
-          sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-5']
-      env: COMPILER='g++-5'
-
-    # - os: osx
-    #   osx_image: xcode7
-    #   compiler: clang
-    #   env: COMPILER='ccache clang++' BUILD_TYPE='Release'
-
+  - os: linux
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-5
+    env: COMPILER='g++-5'
 before_install:
-  - uname -a
-
+- uname -a
 install:
-  - curl -sL https://cmake.org/files/v3.5/cmake-3.5.2-Linux-x86_64.tar.gz | tar xvz
-  - export PATH=$PWD/cmake-3.5.2-Linux-x86_64/bin:$PATH
-  - mkdir vendor/build
-  - cd vendor/build
-  - export CC="gcc-5"
-  - export CXX="g++-5"
-  - cmake .. -DVENDOR_PLATFORM=linux-x64-gcc
-  - make
-
+- curl -sL https://cmake.org/files/v3.5/cmake-3.5.2-Linux-x86_64.tar.gz | tar xvz
+- export PATH=$PWD/cmake-3.5.2-Linux-x86_64/bin:$PATH
+- export CC="gcc-5"
+- export CXX="g++-5"
+- cd ../..
 before_script:
-  - mkdir build
-  - cd build
-  - cmake ..
+- mkdir build
+- cd build
+- cmake ../vendor -DVENDOR_PLATFORM=linux-x64-gcc
 
 script: make
+
+after_script:
+- tar cfz vendor-linux-x64-gcc.tar.gz linux-x64-gcc
+- ls -lh *.gz
+
+deploy:
+  provider: releases
+  api_key:
+    secure: dbvOqFHkUVivBCPRX0oW3Tym12p1Te0+SvZEwdXO3evfmGRICUHF0lUsYtC55BsG8no+Nz2Sq4BI9V/Stp4UFY3gZ5xfk423BE47F1VIK5ilCCsuQYZu6O8t7MXAmUDe1DwxmregB7j4DNbDeavCbCD+Kp7wKuIjxCT8i6cGr3RLmntbaBZDpE2XR8HM/NcRID9dwrASvl1vjhgg/I55qWwsuyBGdD9rx7XvllY7rFQE9oewFyMbvv/wEx6/lppzQuG9EzxQX13G9w+z9/jRyE6NiuDpIlEUiVAnDZ8VZ6G17R8Ap4RMLV/GwtMuyoGuocwgI12qb1dTbzghJElMrPalbQ3LPYHqgOzb7+Gn0AJ5+dogi4/wDZ/d8kYkXdsaDHa4LMxn3qB9zCm45CbdvpGhKlfZN4i+9m+lZeY4pmUPn4Ct77y5GSIbCI5YuEIv9pv9bIU9eZOvuhun7MVT8yQjqRzov+Nho9oTsRqfAMQLdKSyB4wDWJgPNMoceXu/aIDb0Bm3dY3uYuo+Im6y0GRoLnYSnuTBV5GQ1PJkC0SUJritjLza8EH0BAVD3inBHHVMonrjLy07CJiZgOtOxfph4o3hfBNAkfK2l6ETkSKxwsqYnQ+jqmYKF2NfLlZoovBqo9w8WPlNK3dvbu4dgII/FymUJflLm6xtMpuJFmQ=
+  file: vendor-linux-x64-gcc.tar.gz
+  on:
+    repo: johnsusi/test-vendor
