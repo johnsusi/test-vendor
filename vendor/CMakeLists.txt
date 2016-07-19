@@ -138,6 +138,14 @@ ExternalProject_add(
 
 #https://www.openssl.org/source/openssl-1.0.2h.tar.gz
 
+if (${VENDOR_PLATFORM} MATCHES "linux")
+  set(OPENSSL_CONFIG linux-x86_64)
+elseif (${VENDOR_PLATFORM} MATCHES "darwin")
+  set(OPENSSL_CONFIG darwin64-x86_64-cc)
+else ()
+  set(OPENSSL_CONFIG '')
+endif ()
+
 ExternalProject_add(
   openssl
   DEPENDS zlib
@@ -147,9 +155,7 @@ ExternalProject_add(
   BUILD_COMMAND  ""
   UPDATE_COMMAND ""
   CONFIGURE_COMMAND
-#  darwin64-x86_64-cc
-    cd <SOURCE_DIR> && ./Configure
-      linux-x86_64
+    cd <SOURCE_DIR> && ./Configure ${OPENSSL_CONFIG}
       --prefix=${VENDOR_DIR}
       --with-zlib-include=${VENDOR_DIR}/include
       --with-zlib-lib=${VENDOR_DIR}/lib
