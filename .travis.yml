@@ -35,7 +35,6 @@ install:
   - export CXX="g++-5"
   - cmake .. -DVENDOR_PLATFORM=linux-x64-gcc
   - make
-  - make install
 
 before_script:
   - mkdir build
