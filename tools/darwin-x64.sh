@@ -1,2 +1,1 @@
-export CC=clang
-export CXX=clang++
+brew install cmake
