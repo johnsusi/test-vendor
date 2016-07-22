@@ -1,15 +1,15 @@
 language: cpp
 matrix:
   include:
-  # - os: linux
-  #   compiler: gcc
-  #   addons:
-  #     apt:
-  #       sources:
-  #       - ubuntu-toolchain-r-test
-  #       packages:
-  #       - g++-5
-  #   env: VENDOR_PLATFORM=linux-x64-gcc
+  - os: linux
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-5
+    env: VENDOR_PLATFORM=linux-x64-gcc
   # - os: linux
   #   compiler: clang
   #   addons:
