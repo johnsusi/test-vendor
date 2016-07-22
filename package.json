@@ -1,0 +1,14 @@
+{
+  "name": "turner-sdk",
+  "version": "1.0.0",
+  "description": "A bridge from node to native code for games",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "johnsusi/turner-sdk",
+  "author": "John Susi <john@susi.se> (https://github.com/johnsusi/)",
+  "license": "MIT",
+  "bugs": "https://github.com/johnsusi/turner-sdk/issues",
+  "homepage": "https://github.com/johnsusi/turner-sdk#readme"
+}
