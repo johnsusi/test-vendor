@@ -1,3 +1,3 @@
 brew update
-brew install cmake
-brew info cmake
+brew upgrade
+cmake --version
