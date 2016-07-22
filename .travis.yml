@@ -10,26 +10,18 @@ matrix:
         packages:
         - g++-5
     env: COMPILER='g++-5'
-before_install:
-- uname -a
 install:
-- pwd
 - curl -sL https://cmake.org/files/v3.5/cmake-3.5.2-Linux-x86_64.tar.gz | tar xvz
 - export PATH=$PWD/cmake-3.5.2-Linux-x86_64/bin:$PATH
 - export CC="gcc-5"
 - export CXX="g++-5"
-before_script:
-- pwd
+script:
 - mkdir build
 - cd build
 - cmake .. -DVENDOR_PLATFORM=linux-x64-gcc
-script: pwd && make
-after_script:
-- pwd
+- make
 - cd ..
-- ls -l
 - tar cfz vendor-linux-x64-gcc.tar.gz linux-x64-gcc
-- ls -lh *.gz
 deploy:
   provider: releases
   api_key:
