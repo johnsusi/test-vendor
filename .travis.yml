@@ -23,12 +23,12 @@ before_script:
 - mkdir build
 - cd build
 - cmake .. -DVENDOR_PLATFORM=linux-x64-gcc
-- cd ..
 
 script: pwd && make
 
 after_script:
 - pwd
+- cd ..
 - ls -l
 - tar cfz vendor-linux-x64-gcc.tar.gz linux-x64-gcc
 - ls -lh *.gz
