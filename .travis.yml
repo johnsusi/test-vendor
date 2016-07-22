@@ -9,25 +9,22 @@ matrix:
         - ubuntu-toolchain-r-test
         packages:
         - g++-5
-    env: COMPILER='g++-5'
-install:
-- curl -sL https://cmake.org/files/v3.5/cmake-3.5.2-Linux-x86_64.tar.gz | tar xvz
-- export PATH=$PWD/cmake-3.5.2-Linux-x86_64/bin:$PATH
-- export CC="gcc-5"
-- export CXX="g++-5"
+    env: VENDOR_PLATFORM=linux-x64-gcc
+  - os: osx
+    env: VENDOR_PLATFORM=darwin-x64
+install: . ./tools/$VENDOR_PLATFORM.sh
 script:
 - mkdir build
 - cd build
-- cmake .. -DVENDOR_PLATFORM=linux-x64-gcc
+- cmake .. -DVENDOR_PLATFORM=$VENDOR_PLATFORM
 - make
 - cd ..
-- tar cfz vendor-linux-x64-gcc.tar.gz linux-x64-gcc
+- tar cfz $VENDOR_PLATFORM.tar.gz $VENDOR_PLATFORM
 deploy:
   provider: releases
   api_key:
     secure: EaQRPuEovMLoqyzEYtJrVLft+j821/WJYorMjpqXTZqyiE+7BcuohvJi78HlUPK4TcuCPSiGJiIEz9ImPvZD77nu91tUZchPe74I9r9pP/Num7bvl5WKWg03qeJMBtD5fxnuCkrfBGKkMDAe8QjvTKDUKpKEFeAU/hMZaixnJ+ADEMgDdmmb2RJ5SJhRSwflt5N9V+hEqxWSOcBQ1nLPCBUaou8jP2/HDPkUo0vHEZnnXpIj/jU+QqCu5iIal5LSmCeLR1ybtk6TcbaSxriJk2lT1JXrdPooh3aSjg2+q972g4t+vqTSZPaSCVMFGPLKvOb8oaf/Em1D+dDx3fYr6O44ren/rBnW4cKF/KhP5hRY/SVaxq7/A0sOLaBqn/pE+eZHiSp7Nn4LVc4o+gkyCh31uS6VbEpLQxJt3xptJ9aLKtF+w2IWc2tcgyNo+IpOzQQadX7WsHACWJPku9ynTM6amTkwTCN59t5dUJiIKC1EYJQQO65UpFyrcoQfzoJfWCb0FoJkabF4kH8+d7Kidzr/SNXMK5ZCjqlyXTSIK/I0LygCcwAJf/6naRvKk8yDIZG3+0jD7N01Pz+5p/R+j9WDqo1ooUqGlaAhZ22GioDC/GD3MbqHJdKld+LbL/6Fe/7/yTupSRdYNTwMfPZcpzLfy8RJL++Q82blUUL3RzA=
-  file: vendor-linux-x64-gcc.tar.gz
+  file: $VENDOR_PLATFORM.tar.gz
   skip_cleanup: true
   on:
     tags: true
-#    repo: johnsusi/turner-sdk
