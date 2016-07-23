@@ -192,16 +192,18 @@ ExternalProject_add(
   GIT_TAG v0.5.1
   BUILD_COMMAND  ""
   UPDATE_COMMAND ""
-  CONFIGURE_COMMAND cd <SOURCE_DIR> && ./autogen.sh && ./configure --prefix=${VENDOR_DIR}
-  # CMAKE_ARGS
-  #     -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}/test
-  #     -DCMAKE_BUILD_TYPE=Release
-  #     -DCMAKE_CONFIGURATION_TYPES=Release
-  #     -DBUILD_SHARED_LIBS=NO
-  #     -DWEBP_BUILD_CWEBP=ON
-  #     -DWEBP_BUILD_DWEBP=ON
+#  CONFIGURE_COMMAND cd <SOURCE_DIR> && ./autogen.sh && ./configure --prefix=${VENDOR_DIR}
+  CMAKE_ARGS
+      -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
+      -DCMAKE_BUILD_TYPE=Release
+      -DCMAKE_CONFIGURATION_TYPES=Release
+      -DBUILD_SHARED_LIBS=NO
   INSTALL_COMMAND
-    cd <SOURCE_DIR> && make && make install
+#    cd <SOURCE_DIR> && make && make install
+    cmake
+      --build .
+      --target install
+      --config Release
 )
 
 ExternalProject_add(
