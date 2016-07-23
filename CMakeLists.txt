@@ -160,30 +160,36 @@ ExternalProject_add(
 #https://www.openssl.org/source/openssl-1.0.2h.tar.gz
 
 if (${VENDOR_PLATFORM} MATCHES "linux")
-  set(OPENSSL_CONFIG linux-x86_64)
+  set(OPENSSL_CONFIG ./Configure linux-x86_64)
+  set(OPENSSL_INSTALL make && make install)
 elseif (${VENDOR_PLATFORM} MATCHES "darwin")
-  set(OPENSSL_CONFIG darwin64-x86_64-cc)
+  set(OPENSSL_CONFIG ./Configure darwin64-x86_64-cc)
+  set(OPENSSL_INSTALL make && make install)
+elseif (${VENDOR_PLATFORM} MATCHES "win32")
+  set(OPENSSL_CONFIG perl Configure VC-WIN32)
+  set(OPENSSL_INSTALL nmake && nmake install)
 else ()
-  set(OPENSSL_CONFIG '')
+  message(FATAL_ERROR "Unsupported or missing VENDOR_PLATFORM")
 endif ()
 
 ExternalProject_add(
   openssl
   DEPENDS zlib
   URL https://www.openssl.org/source/openssl-1.0.2h.tar.gz
+  URL_HASH SHA256=1d4007e53aad94a5b2002fe045ee7bb0b3d98f1a47f8b2bc851dcd1c74332919
   #GIT_REPOSITORY https://github.com/openssl/openssl.git
   #GIT_TAG        OpenSSL_1_0_2h
   BUILD_COMMAND  ""
   UPDATE_COMMAND ""
   CONFIGURE_COMMAND
-    cd <SOURCE_DIR> && ./Configure ${OPENSSL_CONFIG}
+    cd <SOURCE_DIR> && ${OPENSSL_CONFIG}
       --prefix=${VENDOR_DIR}
       --with-zlib-include=${VENDOR_DIR}/include
       --with-zlib-lib=${VENDOR_DIR}/lib
       no-deprecated
       no-dso
       zlib
-  INSTALL_COMMAND cd <SOURCE_DIR> && make && make install
+  INSTALL_COMMAND cd <SOURCE_DIR> && ${OPENSSL_INSTALL}
 )
 
 ExternalProject_add(
