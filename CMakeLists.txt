@@ -63,13 +63,32 @@ ExternalProject_add(
       --config Release
 )
 
+# ExternalProject_add(
+#   sdl
+#   HG_REPOSITORY "http://hg.libsdl.org/SDL"
+#   HG_TAG        "release-2.0.4"
+#   BUILD_COMMAND ""
+#   CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${VENDOR_DIR} --disable-shared --enable-static
+#   INSTALL_COMMAND make && make install
+# )
+
 ExternalProject_add(
   sdl
   HG_REPOSITORY "http://hg.libsdl.org/SDL"
   HG_TAG        "release-2.0.4"
   BUILD_COMMAND ""
-  CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${VENDOR_DIR} --disable-shared --enable-static
-  INSTALL_COMMAND make && make install
+  CMAKE_ARGS
+      -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
+      -DCMAKE_BUILD_TYPE=Release
+      -DCMAKE_CONFIGURATION_TYPES=Release
+      -DSDL_SHARED_ENABLED_BY_DEFAULT=NO
+      -DSDL_SHARED=NO
+      -DBUILD_SHARED_LIBS=NO
+  INSTALL_COMMAND
+    cmake
+      --build .
+      --target install
+      --config Release
 )
 
 ExternalProject_add(
