@@ -9,157 +9,126 @@ include(ExternalProject)
 
 if (NOT VENDOR_PLATFORM)
 
+  if (NOT VENDOR_ARCH)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      set(VENDOR_ARCH x64)
+    else()
+      set(VENDOR_ARCH ia32)
+    endif()
+  endif()
+
   if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(VENDOR_PLATFORM darwin-x64)
+    set(VENDOR_PLATFORM darwin-${VENDOR_ARCH})
   elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(VENDOR_PLATFORM linux-x64)
+    set(VENDOR_PLATFORM linux-${VENDOR_ARCH})
   elseif (WIN32)
-    set(VENDOR_PLATFORM win32-ia32)
+    set(VENDOR_PLATFORM win32-${VENDOR_ARCH})
   else()
-    set(VENDOR_PLATFORM unknown)
+    message(FATAL_ERROR "Unsupported or missing VENDOR_PLATFORM")
   endif ()
 
 endif()
 
 set(VENDOR_DIR ${PROJECT_SOURCE_DIR}/${VENDOR_PLATFORM})
+set(CACHE_DIR  ${PROJECT_BINARY_DIR}/.cache)
+
+set(VENDOR_SOURCE_DIR ${PROJECT_SOURCE_DIR}/vendor)
 
 ExternalProject_add(
   flatbuffers
-  GIT_REPOSITORY "https://github.com/google/flatbuffers.git"
-  GIT_TAG        "v1.3.0"
-  BUILD_COMMAND  ""
-  UPDATE_COMMAND ""
+  URL ${VENDOR_SOURCE_DIR}/flatbuffers
+  # URL https://github.com/google/flatbuffers/archive/v1.4.0.tar.gz
+#  GIT_REPOSITORY "https://github.com/google/flatbuffers.git"
+#  GIT_TAG        "v1.4.0"
+  DOWNLOAD_DIR   ${CACHE_DIR}
+  CMAKE_GENERATOR ${CMAKE_GENERATOR}
   CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
       -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_CONFIGURATION_TYPES=Release
       -DFLATBUFFERS_BUILD_TESTS=NO
-  INSTALL_COMMAND
-    cmake
-      --build .
-      --target install
-      --config Release
+  BUILD_COMMAND   cmake --build . --config Release
+  INSTALL_COMMAND cmake --build . --config Release --target install
 )
 
 ExternalProject_add(
   liquidfun
-  GIT_REPOSITORY "https://github.com/google/liquidfun.git"
-  GIT_TAG        "v1.1.0"
-  BUILD_COMMAND  ""
-  UPDATE_COMMAND ""
+  URL ${VENDOR_SOURCE_DIR}/liquidfun
+  # URL https://github.com/google/liquidfun/archive/v1.1.0.tar.gz
+#  GIT_REPOSITORY "https://github.com/google/liquidfun.git"
+#  GIT_TAG        "v1.1.0"
+  DOWNLOAD_DIR   ${CACHE_DIR}
+  CMAKE_GENERATOR ${CMAKE_GENERATOR}
   CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
       -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_CONFIGURATION_TYPES=Release
       -DBOX2D_BUILD_EXAMPLES=NO
       -DBOX2D_BUILD_UNITTESTS=NO
       -DBOX2D_INSTALL=ON
       -DBOX2D_INSTALL_DOC=ON
   PATCH_COMMAND ${CMAKE_COMMAND} -DSOURCE_DIR=<SOURCE_DIR> -P ${PROJECT_SOURCE_DIR}/tools/liquidfun.cmake
-  INSTALL_COMMAND
-    cmake
-      --build .
-      --target install
-      --config Release
+  BUILD_COMMAND   cmake --build . --config Release
+  INSTALL_COMMAND cmake --build . --config Release --target install
 )
 
-# ExternalProject_add(
-#   sdl
-#   HG_REPOSITORY "http://hg.libsdl.org/SDL"
-#   HG_TAG        "release-2.0.4"
-#   BUILD_COMMAND ""
-#   CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${VENDOR_DIR} --disable-shared --enable-static
-#   INSTALL_COMMAND make && make install
-# )
-
+# # ExternalProject_add(
+# #   sdl
+# #   HG_REPOSITORY "http://hg.libsdl.org/SDL"
+# #   HG_TAG        "release-2.0.4"
+# #   BUILD_COMMAND ""
+# #   CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${VENDOR_DIR} --disable-shared --enable-static
+# #   INSTALL_COMMAND make && make install
+# # )
+#
 ExternalProject_add(
   sdl
+  # URL https://www.libsdl.org/release/SDL2-2.0.4.tar.gz
   HG_REPOSITORY "http://hg.libsdl.org/SDL"
   HG_TAG        "release-2.0.4"
-  UPDATE_COMMAND ""
-  BUILD_COMMAND ""
+  DOWNLOAD_DIR   ${CACHE_DIR}
+  CMAKE_GENERATOR ${CMAKE_GENERATOR}
   CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
       -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_CONFIGURATION_TYPES=Release
       -DSDL_SHARED_ENABLED_BY_DEFAULT=NO
       -DSDL_SHARED=NO
       -DBUILD_SHARED_LIBS=NO
-  INSTALL_COMMAND
-    cmake
-      --build .
-      --target install
-      --config Release
-)
-
-ExternalProject_add(
-  opencv
-  GIT_REPOSITORY "https://github.com/opencv/opencv.git"
-  GIT_TAG        "3.1.0"
-  BUILD_COMMAND ""
-  UPDATE_COMMAND ""
-  CMAKE_ARGS
-      -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
-      -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_CONFIGURATION_TYPES=Release
-      -DBUILD_SHARED_LIBS=NO
-      -DBUILD_PERF_TESTS=NO
-      -DBUILD_TESTS=NO
-      -DBUILD_JPEG=ON
-      -DBUILD_PNG=ON
-      -DBUILD_TBB=ON
-      -DWITH_QT=NO
-      -DBUILD_opencv_java=NO
-      -DBUILD_opencv_python=NO
-      -DBUILD_opencv_apps=NO
-  INSTALL_COMMAND
-    cmake
-      --build .
-      --target install
-      --config Release
+  BUILD_COMMAND   cmake --build . --config Release
+  INSTALL_COMMAND cmake --build . --config Release --target install
 )
 
 ExternalProject_add(
   zlib
   URL http://zlib.net/zlib-1.2.8.tar.gz
   URL_HASH MD5=44d667c142d7cda120332623eab69f40
-  BUILD_COMMAND ""
+  DOWNLOAD_DIR   ${CACHE_DIR}
   CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
       -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_CONFIGURATION_TYPES=Release
       -DBUILD_SHARED_LIBS=NO
-  INSTALL_COMMAND
-    cmake
-      --build .
-      --target install
-      --config Release
+  BUILD_COMMAND   cmake --build . --config Release
+  INSTALL_COMMAND cmake --build . --config Release --target install
 )
 
-ExternalProject_add(
-  png
-  DEPENDS zlib
-  URL ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.23.tar.gz
-  URL_HASH MD5=a49e4cc48d968c79def53d082809c9f2
-  BUILD_COMMAND ""
-  CMAKE_ARGS
-      -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
-      -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_CONFIGURATION_TYPES=Release
-      -DBUILD_SHARED_LIBS=NO
-      -DPNG_SHARED=NO
-      -DPNG_TESTS=NO
-      -DZLIB_ROOT=${VENDOR_DIR}
-  INSTALL_COMMAND
-    cmake
-      --build .
-      --target install
-      --config Release
-)
-
-
-#https://www.openssl.org/source/openssl-1.0.2h.tar.gz
-
+# ExternalProject_add(
+#   png
+#   DEPENDS zlib
+#   URL ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.24.tar.gz
+#   URL_HASH MD5=65213080dd30a9b16193d9b83adc1ee9
+#   DOWNLOAD_DIR   ${CACHE_DIR}
+#   CMAKE_ARGS
+#       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
+#       -DCMAKE_BUILD_TYPE=Release
+#       -DBUILD_SHARED_LIBS=NO
+#       -DPNG_SHARED=NO
+#       -DPNG_TESTS=NO
+#       -DZLIB_ROOT=${VENDOR_DIR}
+#   BUILD_COMMAND   cmake --build . --config Release
+#   INSTALL_COMMAND cmake --build . --config Release --target install
+# )
+#
+#
+# #https://www.openssl.org/source/openssl-1.0.2h.tar.gz
+#
 if (${VENDOR_PLATFORM} MATCHES "linux")
   set(OPENSSL_CONFIG ./Configure linux-x86_64)
   set(OPENSSL_INSTALL make && make install)
@@ -180,62 +149,67 @@ ExternalProject_add(
   URL_HASH SHA256=1d4007e53aad94a5b2002fe045ee7bb0b3d98f1a47f8b2bc851dcd1c74332919
   #GIT_REPOSITORY https://github.com/openssl/openssl.git
   #GIT_TAG        OpenSSL_1_0_2h
-  BUILD_COMMAND  ""
-  UPDATE_COMMAND ""
+  DOWNLOAD_DIR   ${CACHE_DIR}
+  CMAKE_GENERATOR ${CMAKE_GENERATOR}
   CONFIGURE_COMMAND
     cd <SOURCE_DIR> && ${OPENSSL_CONFIG}
       --prefix=${VENDOR_DIR}
       --with-zlib-include=${VENDOR_DIR}/include
       --with-zlib-lib=${VENDOR_DIR}/lib
       zlib
-  INSTALL_COMMAND "cd <SOURCE_DIR> && ${OPENSSL_INSTALL}"
+  BUILD_COMMAND  ""
+  INSTALL_COMMAND cd <SOURCE_DIR> && ${OPENSSL_INSTALL}
 )
 
-ExternalProject_add(
-  webp
-  GIT_REPOSITORY https://github.com/webmproject/libwebp.git
-  GIT_TAG v0.5.1
-  BUILD_COMMAND  ""
-  UPDATE_COMMAND ""
-#  CONFIGURE_COMMAND cd <SOURCE_DIR> && ./autogen.sh && ./configure --prefix=${VENDOR_DIR}
-  CMAKE_ARGS
-      -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
-      -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_CONFIGURATION_TYPES=Release
-      -DBUILD_SHARED_LIBS=NO
-  INSTALL_COMMAND
-#    cd <SOURCE_DIR> && make && make install
-    cmake
-      --build .
-      --target install
-      --config Release
-)
+# ExternalProject_add(
+#   webp
+#   URL ${VENDOR_SOURCE_DIR}/libwebp
+#   # URL https://github.com/webmproject/libwebp/archive/v0.5.1.tar.gz
+#   # GIT_REPOSITORY https://chromium.googlesource.com/webm/libwebp
+#   # GIT_TAG v0.5.1
+#   DOWNLOAD_DIR   ${CACHE_DIR}
+#   # CONFIGURE_COMMAND cd <SOURCE_DIR> && ./autogen.sh && ./configure --prefix=${VENDOR_DIR}
+#   CMAKE_GENERATOR ${CMAKE_GENERATOR}
+#   CMAKE_ARGS
+#       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
+#       -DCMAKE_BUILD_TYPE=Release
+#       -DBUILD_SHARED_LIBS=NO
+#   BUILD_COMMAND   cmake --build . --config Release
+#   INSTALL_COMMAND cmake --build . --config Release --target install
+# )
 
 ExternalProject_add(
   zeromq
-  GIT_REPOSITORY https://github.com/zeromq/libzmq
+  URL ${VENDOR_SOURCE_DIR}/libzmq
+  # URL https://github.com/zeromq/zeromq4-1/releases/download/v4.1.5/zeromq-4.1.5.tar.gz
+  # GIT_REPOSITORY https://github.com/zeromq/libzmq
 #  GIT_TAG
-  BUILD_COMMAND  ""
-  UPDATE_COMMAND ""
+  DOWNLOAD_DIR   ${CACHE_DIR}
+  CMAKE_GENERATOR ${CMAKE_GENERATOR}
   CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
       -DCMAKE_BUILD_TYPE=Release
       -DCMAKE_CONFIGURATION_TYPES=Release
       -DBUILD_SHARED_LIBS=NO
-  INSTALL_COMMAND
-    cmake
-      --build .
-      --target install
-      --config Release
+      -DZMQ_BUILD_FRAMEWORK=NO
+      -DZMQ_BUILD_TESTS=NO
+  BUILD_COMMAND   cmake --build . --config Release
+  INSTALL_COMMAND cmake --build . --config Release --target install
 )
 
 ExternalProject_add(
   curl
   DEPENDS zlib openssl
-  GIT_REPOSITORY https://github.com/curl/curl.git
-  GIT_TAG        curl-7_49_1
-  BUILD_COMMAND  ""
-  UPDATE_COMMAND ""
+  URL ${VENDOR_SOURCE_DIR}/curl
+  # URL https://curl.haxx.se/download/curl-7.50.1.tar.gz
+  # GIT_REPOSITORY https://github.com/curl/curl.git
+  # GIT_TAG        curl-7_49_1
+  DOWNLOAD_DIR   ${CACHE_DIR}
+  # CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${VENDOR_DIR} --disable-shared --enable-static
+  # BUILD_COMMAND   make
+  # INSTALL_COMMAND make install
+
+  CMAKE_GENERATOR ${CMAKE_GENERATOR}
   CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
       -DCMAKE_BUILD_TYPE=Release
@@ -245,12 +219,62 @@ ExternalProject_add(
       -DHTTP_ONLY=YES
       -DOPENSSL_ROOT_DIR=${VENDOR_DIR}
       -DBUILD_CURL_EXE=NO
-  INSTALL_COMMAND
-    cmake
-      --build .
-      --target install
-      --config Release
+      -DZLIB_ROOT=${VENDOR_DIR}
+  BUILD_COMMAND   cmake --build . --config Release
+  INSTALL_COMMAND cmake --build . --config Release --target install
 )
+
+ExternalProject_add(
+  glfw
+  URL ${VENDOR_SOURCE_DIR}/glfw
+  # URL https://github.com/glfw/glfw/archive/3.2.1.tar.gz
+  # GIT_REPOSITORY "https://github.com/glfw/glfw.git"
+  # GIT_TAG        "3.2.1"
+  DOWNLOAD_DIR   ${CACHE_DIR}
+  CMAKE_GENERATOR ${CMAKE_GENERATOR}
+  CMAKE_ARGS
+      -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
+      -DCMAKE_BUILD_TYPE=Release
+      -DCMAKE_CONFIGURATION_TYPES=Release
+      -BUILD_SHARED_LIBS=NO
+      -DGLFW_BUILD_EXAMPLES=NO
+      -DGLFW_BUILD_TESTS=NO
+      -DGLFW_BUILD_DOCS=NO
+  BUILD_COMMAND   cmake --build . --config Release
+  INSTALL_COMMAND cmake --build . --config Release --target install
+)
+
+ExternalProject_add(
+  opencv
+  DEPENDS zlib
+  URL ${VENDOR_SOURCE_DIR}/opencv
+  # URL https://github.com/opencv/opencv/archive/3.1.0.tar.gz
+  # GIT_REPOSITORY "https://github.com/opencv/opencv.git"
+  # GIT_TAG        "3.1.0"
+  DOWNLOAD_DIR   ${CACHE_DIR}
+  CMAKE_GENERATOR ${CMAKE_GENERATOR}
+  CMAKE_ARGS
+      -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
+      -DCMAKE_BUILD_TYPE=Release
+      -DBUILD_SHARED_LIBS=NO
+      -DBUILD_PERF_TESTS=NO
+      -DBUILD_TESTS=NO
+      -DBUILD_JPEG=YES
+      -DBUILD_PNG=YES
+      -DBUILD_WEBP=YES
+      -DBUILD_TBB=YES
+      -DBUILD_ZLIB=NO
+      -DWITH_QT=NO
+      -DBUILD_FFMPEG=YES
+      -DBUILD_opencv_java=NO
+      -DBUILD_opencv_python=NO
+      -DBUILD_opencv_apps=NO
+      -DZLIB_ROOT=${VENDOR_DIR}
+  BUILD_COMMAND   cmake --build . --config Release
+  INSTALL_COMMAND cmake --build . --config Release --target install
+)
+
+
 
 # ExternalProject_add(
 #   devil

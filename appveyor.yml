@@ -1,0 +1,9 @@
+environment:
+  PreferredToolArchitecture: x64
+
+matrix:
+  - platform: x64
+    configuration: Release
+
+install:
+  - cinst cmake strawberryperl

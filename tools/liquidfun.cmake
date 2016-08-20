@@ -1,7 +1,4 @@
 
-message("script")
-message(${SOURCE_DIR})
-
 set(TARGET "${SOURCE_DIR}/CMakeLists.txt")
 
 file(WRITE ${TARGET} "
