@@ -2,3 +2,4 @@ build*
 darwin-*
 linux-*
 win32-*
+.vagrant

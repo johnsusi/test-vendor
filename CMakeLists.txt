@@ -238,8 +238,8 @@ ExternalProject_add(
 ExternalProject_add(
   curl
   DEPENDS zlib openssl
-  URL ${VENDOR_SOURCE_DIR}/curl
-  # URL https://curl.haxx.se/download/curl-7.50.1.tar.gz
+  URL https://curl.haxx.se/download/curl-7.50.3.tar.gz
+  URL_HASH SHA256=3991c2234986178af3b3f693e5afa35d49da2ab4ba61292e3817222446dca7e1
   # GIT_REPOSITORY https://github.com/curl/curl.git
   # GIT_TAG        curl-7_49_1
   DOWNLOAD_DIR   ${CACHE_DIR}
@@ -247,20 +247,29 @@ ExternalProject_add(
   # BUILD_COMMAND   make
   # INSTALL_COMMAND make install
 
-  CMAKE_GENERATOR ${CMAKE_GENERATOR}
-  CMAKE_ARGS
-      -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
-      -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_OSX_DEPLOYMENT_TARGET="10.7"
-      -DBUILD_SHARED_LIBS=NO
-      -DCURL_STATICLIB=YES
-      -DHTTP_ONLY=YES
-      -DUSE_NGHTTP2=YES
-      -DOPENSSL_ROOT_DIR=${VENDOR_DIR}
-      -DBUILD_CURL_EXE=NO
-      -DZLIB_ROOT=${VENDOR_DIR}
-  BUILD_COMMAND   cmake --build . --config Release
-  INSTALL_COMMAND cmake --build . --config Release --target install
+  # CMAKE_GENERATOR ${CMAKE_GENERATOR}
+  # CMAKE_ARGS
+  #     -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
+  #     -DCMAKE_BUILD_TYPE=Release
+  #     -DCMAKE_OSX_DEPLOYMENT_TARGET="10.7"
+  #     -DBUILD_SHARED_LIBS=NO
+  #     -DCURL_STATICLIB=YES
+  #     -DHTTP_ONLY=YES
+  #     -DUSE_NGHTTP2=YES
+  #     -DOPENSSL_ROOT_DIR=${VENDOR_DIR}
+  #     -DBUILD_CURL_EXE=NO
+  #     -DZLIB_ROOT=${VENDOR_DIR}
+  # BUILD_COMMAND   cmake --build . --config Release
+  # INSTALL_COMMAND cmake --build . --config Release --target install
+  BUILD_IN_SOURCE 1
+  CONFIGURE_COMMAND ./configure
+    --prefix=${VENDOR_DIR}
+    --enable-static
+    --disable-shared
+    --with-zlib=${VENDOR_DIR}
+    --with-ssl=${VENDOR_DIR}
+  BUILD_COMMAND make
+  INSTALL_COMMAND make install
 )
 
 ExternalProject_add(
