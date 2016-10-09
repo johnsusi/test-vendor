@@ -1,33 +1,20 @@
 cmake_minimum_required (VERSION 3.5)
 
+if (APPLE)
+  set(ENV{MACOSX_DEPLOYMENT_TARGET} "10.7")
+  set(CFLAGS "-mmacosx-version-min=10.7")
+endif()
+
 project(turner)
+
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/tools)
 
 set(CMAKE_MACOSX_RPATH ON)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
 
 include(ExternalProject)
 
-if (NOT VENDOR_PLATFORM)
-
-  if (NOT VENDOR_ARCH)
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-      set(VENDOR_ARCH x64)
-    else()
-      set(VENDOR_ARCH ia32)
-    endif()
-  endif()
-
-  if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(VENDOR_PLATFORM darwin-${VENDOR_ARCH})
-  elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(VENDOR_PLATFORM linux-${VENDOR_ARCH})
-  elseif (WIN32)
-    set(VENDOR_PLATFORM win32-${VENDOR_ARCH})
-  else()
-    message(FATAL_ERROR "Unsupported or missing VENDOR_PLATFORM")
-  endif ()
-
-endif()
+include(VendorPlatform)
 
 set(VENDOR_DIR ${PROJECT_SOURCE_DIR}/${VENDOR_PLATFORM})
 set(CACHE_DIR  ${PROJECT_BINARY_DIR}/.cache)
@@ -45,6 +32,7 @@ ExternalProject_add(
   CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
       -DCMAKE_BUILD_TYPE=Release
+      -DCMAKE_OSX_DEPLOYMENT_TARGET="10.7"
       -DFLATBUFFERS_BUILD_TESTS=NO
   BUILD_COMMAND   cmake --build . --config Release
   INSTALL_COMMAND cmake --build . --config Release --target install
@@ -61,6 +49,8 @@ ExternalProject_add(
   CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
       -DCMAKE_BUILD_TYPE=Release
+      -DCMAKE_OSX_DEPLOYMENT_TARGET="10.7"
+      -DBUILD_SHARED_LIBS=NO
       -DBOX2D_BUILD_EXAMPLES=NO
       -DBOX2D_BUILD_UNITTESTS=NO
       -DBOX2D_INSTALL=ON
@@ -70,15 +60,6 @@ ExternalProject_add(
   INSTALL_COMMAND cmake --build . --config Release --target install
 )
 
-# # ExternalProject_add(
-# #   sdl
-# #   HG_REPOSITORY "http://hg.libsdl.org/SDL"
-# #   HG_TAG        "release-2.0.4"
-# #   BUILD_COMMAND ""
-# #   CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${VENDOR_DIR} --disable-shared --enable-static
-# #   INSTALL_COMMAND make && make install
-# # )
-#
 ExternalProject_add(
   sdl
   # URL https://www.libsdl.org/release/SDL2-2.0.4.tar.gz
@@ -89,6 +70,8 @@ ExternalProject_add(
   CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
       -DCMAKE_BUILD_TYPE=Release
+      -DCMAKE_OSX_DEPLOYMENT_TARGET="10.7"
+      -DBUILD_SHARED_LIBS=NO
       -DSDL_SHARED_ENABLED_BY_DEFAULT=NO
       -DSDL_SHARED=NO
       -DBUILD_SHARED_LIBS=NO
@@ -100,13 +83,11 @@ ExternalProject_add(
   zlib
   URL http://zlib.net/zlib-1.2.8.tar.gz
   URL_HASH MD5=44d667c142d7cda120332623eab69f40
-  DOWNLOAD_DIR   ${CACHE_DIR}
-  CMAKE_ARGS
-      -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
-      -DCMAKE_BUILD_TYPE=Release
-      -DBUILD_SHARED_LIBS=NO
-  BUILD_COMMAND   cmake --build . --config Release
-  INSTALL_COMMAND cmake --build . --config Release --target install
+  DOWNLOAD_DIR            ${CACHE_DIR}
+  BUILD_IN_SOURCE         1
+  CONFIGURE_COMMAND       "CFLAGS=${CFLAGS}" ./configure --prefix=${VENDOR_DIR} --static
+  BUILD_COMMAND   make
+  INSTALL_COMMAND make install
 )
 
 # ExternalProject_add(
@@ -133,7 +114,7 @@ if (${VENDOR_PLATFORM} MATCHES "linux")
   set(OPENSSL_CONFIG ./Configure linux-x86_64)
   set(OPENSSL_INSTALL make && make install)
 elseif (${VENDOR_PLATFORM} MATCHES "darwin")
-  set(OPENSSL_CONFIG ./Configure darwin64-x86_64-cc)
+  set(OPENSSL_CONFIG ./Configure darwin64-x86_64-cc -mmacosx-version-min=10.7)
   set(OPENSSL_INSTALL make && make install)
 elseif (${VENDOR_PLATFORM} MATCHES "win32")
   set(OPENSSL_CONFIG perl Configure VC-WIN64A)
@@ -150,15 +131,15 @@ ExternalProject_add(
   #GIT_REPOSITORY https://github.com/openssl/openssl.git
   #GIT_TAG        OpenSSL_1_0_2h
   DOWNLOAD_DIR   ${CACHE_DIR}
-  CMAKE_GENERATOR ${CMAKE_GENERATOR}
+  BUILD_IN_SOURCE 1
   CONFIGURE_COMMAND
-    cd <SOURCE_DIR> && ${OPENSSL_CONFIG}
+    ${OPENSSL_CONFIG}
       --prefix=${VENDOR_DIR}
       --with-zlib-include=${VENDOR_DIR}/include
       --with-zlib-lib=${VENDOR_DIR}/lib
       zlib
   BUILD_COMMAND  ""
-  INSTALL_COMMAND cd <SOURCE_DIR> && ${OPENSSL_INSTALL}
+  INSTALL_COMMAND ${OPENSSL_INSTALL}
 )
 
 # ExternalProject_add(
@@ -189,7 +170,7 @@ ExternalProject_add(
   CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
       -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_CONFIGURATION_TYPES=Release
+      -DCMAKE_OSX_DEPLOYMENT_TARGET="10.7"
       -DBUILD_SHARED_LIBS=NO
       -DZMQ_BUILD_FRAMEWORK=NO
       -DZMQ_BUILD_TESTS=NO
@@ -213,10 +194,11 @@ ExternalProject_add(
   CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
       -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_CONFIGURATION_TYPES=Release
+      -DCMAKE_OSX_DEPLOYMENT_TARGET="10.7"
       -DBUILD_SHARED_LIBS=NO
       -DCURL_STATICLIB=YES
       -DHTTP_ONLY=YES
+      -DUSE_NGHTTP2=YES
       -DOPENSSL_ROOT_DIR=${VENDOR_DIR}
       -DBUILD_CURL_EXE=NO
       -DZLIB_ROOT=${VENDOR_DIR}
@@ -235,8 +217,10 @@ ExternalProject_add(
   CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
       -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_CONFIGURATION_TYPES=Release
-      -BUILD_SHARED_LIBS=NO
+      -DCMAKE_OSX_DEPLOYMENT_TARGET="10.7"
+      -DCMAKE_CXX_FLAGS="-std=c++11 -stdlib=libc++"
+      -DCMAKE_EXE_LINKER_FLAGS="-std=c++11 -stdlib=libc++"
+      -DBUILD_SHARED_LIBS=NO
       -DGLFW_BUILD_EXAMPLES=NO
       -DGLFW_BUILD_TESTS=NO
       -DGLFW_BUILD_DOCS=NO
@@ -256,6 +240,9 @@ ExternalProject_add(
   CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
       -DCMAKE_BUILD_TYPE=Release
+      -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7
+      "-DCMAKE_CXX_FLAGS=-std=c++11 -stdlib=libc++"
+      "-DCMAKE_EXE_LINKER_FLAGS=-std=c++11 -stdlib=libc++"
       -DBUILD_SHARED_LIBS=NO
       -DBUILD_PERF_TESTS=NO
       -DBUILD_TESTS=NO
@@ -270,10 +257,10 @@ ExternalProject_add(
       -DBUILD_opencv_python=NO
       -DBUILD_opencv_apps=NO
       -DZLIB_ROOT=${VENDOR_DIR}
+      -D3P_LIBRARY_OUTPUT_PATH=${VENDOR_DIR}/lib
   BUILD_COMMAND   cmake --build . --config Release
   INSTALL_COMMAND cmake --build . --config Release --target install
 )
-
 
 
 # ExternalProject_add(

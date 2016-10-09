@@ -19,3 +19,9 @@
 [submodule "vendor/liquidfun"]
 	path = vendor/liquidfun
 	url = https://github.com/google/liquidfun.git
+[submodule "vendor/libsodium"]
+	path = vendor/libsodium
+	url = https://github.com/jedisct1/libsodium.git
+[submodule "vendor/rabbitmq-c"]
+	path = vendor/rabbitmq-c
+	url = https://github.com/alanxz/rabbitmq-c.git
