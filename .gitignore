@@ -1,0 +1,4 @@
+build*
+darwin-*
+linux-*
+win32-*

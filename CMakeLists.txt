@@ -23,8 +23,9 @@ set(VENDOR_SOURCE_DIR ${PROJECT_SOURCE_DIR}/vendor)
 
 ExternalProject_add(
   flatbuffers
-  URL ${VENDOR_SOURCE_DIR}/flatbuffers
-  # URL https://github.com/google/flatbuffers/archive/v1.4.0.tar.gz
+  # URL ${VENDOR_SOURCE_DIR}/flatbuffers
+  URL https://github.com/google/flatbuffers/archive/v1.4.0.tar.gz
+  URL_HASH SHA256=d3355f0adcc16054afcce4a3eac90b9c26f926be9a65b2e158867f56ab689e63
 #  GIT_REPOSITORY "https://github.com/google/flatbuffers.git"
 #  GIT_TAG        "v1.4.0"
   DOWNLOAD_DIR   ${CACHE_DIR}
@@ -40,8 +41,8 @@ ExternalProject_add(
 
 ExternalProject_add(
   liquidfun
-  URL ${VENDOR_SOURCE_DIR}/liquidfun
-  # URL https://github.com/google/liquidfun/archive/v1.1.0.tar.gz
+  URL https://github.com/google/liquidfun/archive/v1.1.0.tar.gz
+  URL_HASH SHA256=b7ae0d3dc8e21e91b276c25629e5bbd294187a9e32b4628ee13177d7025dd486
 #  GIT_REPOSITORY "https://github.com/google/liquidfun.git"
 #  GIT_TAG        "v1.1.0"
   DOWNLOAD_DIR   ${CACHE_DIR}
@@ -62,21 +63,30 @@ ExternalProject_add(
 
 ExternalProject_add(
   sdl
-  # URL https://www.libsdl.org/release/SDL2-2.0.4.tar.gz
-  HG_REPOSITORY "http://hg.libsdl.org/SDL"
-  HG_TAG        "release-2.0.4"
+  URL https://www.libsdl.org/release/SDL2-2.0.4.tar.gz
+  URL_HASH SHA256=da55e540bf6331824153805d58b590a29c39d2d506c6d02fa409aedeab21174b
+  # HG_REPOSITORY "http://hg.libsdl.org/SDL"
+  # HG_TAG        "release-2.0.4"
   DOWNLOAD_DIR   ${CACHE_DIR}
-  CMAKE_GENERATOR ${CMAKE_GENERATOR}
-  CMAKE_ARGS
-      -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
-      -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_OSX_DEPLOYMENT_TARGET="10.7"
-      -DBUILD_SHARED_LIBS=NO
-      -DSDL_SHARED_ENABLED_BY_DEFAULT=NO
-      -DSDL_SHARED=NO
-      -DBUILD_SHARED_LIBS=NO
-  BUILD_COMMAND   cmake --build . --config Release
-  INSTALL_COMMAND cmake --build . --config Release --target install
+  # CMAKE_GENERATOR ${CMAKE_GENERATOR}
+  # CMAKE_ARGS
+  #     -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
+  #     -DCMAKE_BUILD_TYPE=Release
+  #     -DCMAKE_OSX_DEPLOYMENT_TARGET="10.7"
+  #     -DBUILD_SHARED_LIBS=NO
+  #     -DSDL_SHARED_ENABLED_BY_DEFAULT=NO
+  #     -DSDL_SHARED=NO
+  #     -DBUILD_SHARED_LIBS=NO
+  # BUILD_COMMAND   cmake --build . --config Release
+  # INSTALL_COMMAND cmake --build . --config Release --target install
+  BUILD_IN_SOURCE   1
+  CONFIGURE_COMMAND ./configure
+      --prefix=${VENDOR_DIR}
+      --disable-shared
+      --enable-static
+  BUILD_COMMAND make
+  INSTALL_COMMAND make install
+
 )
 
 ExternalProject_add(
@@ -126,8 +136,8 @@ endif ()
 ExternalProject_add(
   openssl
   DEPENDS zlib
-  URL https://www.openssl.org/source/openssl-1.0.2h.tar.gz
-  URL_HASH SHA256=1d4007e53aad94a5b2002fe045ee7bb0b3d98f1a47f8b2bc851dcd1c74332919
+  URL https://www.openssl.org/source/old/1.0.2/openssl-1.0.2i.tar.gz
+  URL_HASH SHA256=9287487d11c9545b6efb287cdb70535d4e9b284dd10d51441d9b9963d000de6f
   #GIT_REPOSITORY https://github.com/openssl/openssl.git
   #GIT_TAG        OpenSSL_1_0_2h
   DOWNLOAD_DIR   ${CACHE_DIR}
@@ -161,21 +171,68 @@ ExternalProject_add(
 
 ExternalProject_add(
   zeromq
-  URL ${VENDOR_SOURCE_DIR}/libzmq
-  # URL https://github.com/zeromq/zeromq4-1/releases/download/v4.1.5/zeromq-4.1.5.tar.gz
+  # URL ${VENDOR_SOURCE_DIR}/libzmq
+  URL https://github.com/zeromq/zeromq4-1/releases/download/v4.1.5/zeromq-4.1.5.tar.gz
+  URL_HASH SHA1=2b7490b77860be3060b1b1f92cd73184d309ca69
   # GIT_REPOSITORY https://github.com/zeromq/libzmq
 #  GIT_TAG
+  DOWNLOAD_DIR   ${CACHE_DIR}
+  # CMAKE_GENERATOR ${CMAKE_GENERATOR}
+  # CMAKE_ARGS
+  #     -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
+  #     -DCMAKE_BUILD_TYPE=Release
+  #     -DCMAKE_OSX_DEPLOYMENT_TARGET="10.7"
+  #     -DBUILD_SHARED_LIBS=NO
+  #     -DZMQ_BUILD_FRAMEWORK=NO
+  #     -DZMQ_BUILD_TESTS=NO
+  # BUILD_COMMAND   cmake --build . --config Release
+  # INSTALL_COMMAND cmake --build . --config Release --target install
+  BUILD_IN_SOURCE   1
+  CONFIGURE_COMMAND ./configure
+    --prefix=${VENDOR_DIR}
+    --disable-shared
+    --enable-static
+  BUILD_COMMAND make
+  INSTALL_COMMAND make install
+)
+
+ExternalProject_add(
+  cppzmq
+  GIT_REPOSITORY https://github.com/zeromq/cppzmq.git
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ""
+  INSTALL_COMMAND
+    cmake -E copy
+      <SOURCE_DIR>/zmq.hpp
+      <SOURCE_DIR>/zmq_addon.hpp
+      ${VENDOR_DIR}/include
+)
+
+ExternalProject_add(
+  rabbitmq-c
+  URL https://github.com/alanxz/rabbitmq-c/releases/download/v0.8.0/rabbitmq-c-0.8.0.tar.gz
+  URL_HASH SHA256=277acd9f624a03a0918d3ba517b9b2950718821844b29d7115e12a716c9d1a07
   DOWNLOAD_DIR   ${CACHE_DIR}
   CMAKE_GENERATOR ${CMAKE_GENERATOR}
   CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${VENDOR_DIR}
       -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_OSX_DEPLOYMENT_TARGET="10.7"
+      -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7
       -DBUILD_SHARED_LIBS=NO
-      -DZMQ_BUILD_FRAMEWORK=NO
-      -DZMQ_BUILD_TESTS=NO
   BUILD_COMMAND   cmake --build . --config Release
   INSTALL_COMMAND cmake --build . --config Release --target install
+)
+
+ExternalProject_add(
+  boost
+  URL https://downloads.sourceforge.net/project/boost/boost/1.62.0/boost_1_62_0.tar.bz2
+  URL_HASH SHA256=36c96b0f6155c98404091d8ceb48319a28279ca0333fba1ad8611eb90afb2ca0
+  DOWNLOAD_DIR ${CACHE_DIR}
+  BUILD_IN_SOURCE 1
+  CONFIGURE_COMMAND ./bootstrap.sh
+      --prefix=${VENDOR_DIR}
+  BUILD_COMMAND  ./b2 link=static
+  INSTALL_COMMAND ./b2 link=static install
 )
 
 ExternalProject_add(
@@ -208,8 +265,8 @@ ExternalProject_add(
 
 ExternalProject_add(
   glfw
-  URL ${VENDOR_SOURCE_DIR}/glfw
-  # URL https://github.com/glfw/glfw/archive/3.2.1.tar.gz
+  URL https://github.com/glfw/glfw/archive/3.2.1.tar.gz
+  URL_HASH SHA256=e10f0de1384d75e6fc210c53e91843f6110d6c4f3afbfb588130713c2f9d8fe8
   # GIT_REPOSITORY "https://github.com/glfw/glfw.git"
   # GIT_TAG        "3.2.1"
   DOWNLOAD_DIR   ${CACHE_DIR}
@@ -231,8 +288,9 @@ ExternalProject_add(
 ExternalProject_add(
   opencv
   DEPENDS zlib
-  URL ${VENDOR_SOURCE_DIR}/opencv
-  # URL https://github.com/opencv/opencv/archive/3.1.0.tar.gz
+  #URL ${VENDOR_SOURCE_DIR}/opencv
+  URL https://github.com/opencv/opencv/archive/3.1.0.tar.gz
+  URL_HASH SHA256=f00b3c4f42acda07d89031a2ebb5ebe390764a133502c03a511f67b78bbd4fbf
   # GIT_REPOSITORY "https://github.com/opencv/opencv.git"
   # GIT_TAG        "3.1.0"
   DOWNLOAD_DIR   ${CACHE_DIR}
@@ -258,6 +316,7 @@ ExternalProject_add(
       -DBUILD_opencv_apps=NO
       -DZLIB_ROOT=${VENDOR_DIR}
       -D3P_LIBRARY_OUTPUT_PATH=${VENDOR_DIR}/lib
+      -DBUILD_opencv_videoio=OFF #remove when fixed
   BUILD_COMMAND   cmake --build . --config Release
   INSTALL_COMMAND cmake --build . --config Release --target install
 )
@@ -281,3 +340,14 @@ ExternalProject_add(
 #       --target install
 #       --config Release
 # )
+
+ExternalProject_add(
+  catch
+  GIT_REPOSITORY https://github.com/philsquared/Catch
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ""
+  INSTALL_COMMAND
+    cmake -E copy
+      <SOURCE_DIR>/single_include/catch.hpp
+      ${VENDOR_DIR}/include
+)
